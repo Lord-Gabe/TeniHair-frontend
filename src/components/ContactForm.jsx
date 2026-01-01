@@ -234,7 +234,7 @@ export default function ContactForm() {
       <input name="name" placeholder="Your Name" value={formData.name} onChange={handleChange} required />
       <input name="email" type="email" placeholder="Your Email" value={formData.email} onChange={handleChange} required />
 
-      <select name="service" value={formData.service} onChange={handleChange} required>
+      <select name="service" value={formData.service} className={"service-select"} onChange={handleChange} required>
         <option value="">Select a Service</option>
         {Object.keys(serviceOptions).map((service) => (
           <option key={service} value={service}>{service}</option>
@@ -242,7 +242,7 @@ export default function ContactForm() {
       </select>
 
       {formData.service && (
-        <select name="subservice" value={formData.subservice} onChange={handleChange} required>
+        <select name="subservice" value={formData.subservice} className={"service-select"} onChange={handleChange} required>
           <option value="">Select a Sub-Service</option>
           {serviceOptions[formData.service].map((sub) => (
             <option key={sub} value={sub}>{sub}</option>
@@ -251,7 +251,7 @@ export default function ContactForm() {
       )}
 
       {subServiceSpecs[formData.subservice] && (
-        <select name="subservice2" value={formData.subservice2} onChange={handleChange} required>
+        <select name="subservice2" value={formData.subservice2} className={"service-select"} onChange={handleChange} required>
           <option value="">Select Specification</option>
           {subServiceSpecs[formData.subservice].map((spec) => (
             <option key={spec} value={spec}>{spec}</option>
@@ -264,7 +264,7 @@ export default function ContactForm() {
           <input type="date" name="date" min={today} value={formData.date} onChange={handleChange} required />
           {dateError && <p className="error">{dateError}</p>}
 
-          <select name="time" value={formData.time} onChange={handleChange} required>
+          <select name="time" value={formData.time} className={"service-select"} onChange={handleChange} required>
             <option value="">Select a Time</option>
             {timeSlots.map((time) => {
               const past = !isTimeSlotValid(formData.date, time);
