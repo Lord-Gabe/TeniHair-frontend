@@ -1,4 +1,5 @@
 import { useState } from "react";
+import emailjs from "@emailjs/browser";
 
 /* MAIN SERVICES → SUBSERVICES */
 const serviceOptions = {
@@ -84,7 +85,7 @@ const subServiceSpecs = {
 /* FIXED TIME SLOTS */
 const timeSlots = ["09:00", "12:00", "15:00"];
 
-/* BLOCK PAST TIMES TODAY */
+/* TIME HELPERS */
 const isTimeSlotValid = (selectedDate, slot) => {
   if (!selectedDate) return true;
 
@@ -99,7 +100,6 @@ const isTimeSlotValid = (selectedDate, slot) => {
   return slotTime > now;
 };
 
-// Convert "HH:MM" to "HH:MM AM/PM"
 const formatTime = (time) => {
   const [hour, minute] = time.split(":").map(Number);
   const period = hour >= 12 ? "PM" : "AM";
@@ -107,6 +107,19 @@ const formatTime = (time) => {
   return `${displayHour}:${minute.toString().padStart(2, "0")} ${period}`;
 };
 
+/* DUPLICATE BOOKING HELPERS */
+const generateBookingKey = ({ email, service, subservice, date, time }) =>
+  `${email}_${service}_${subservice}_${date}_${time}`;
+
+const getBookedSlots = (date) => {
+  const stored = localStorage.getItem(`booked_${date}`);
+  return stored ? JSON.parse(stored) : [];
+};
+
+const saveBookedSlot = (date, time) => {
+  const slots = getBookedSlots(date);
+  localStorage.setItem(`booked_${date}`, JSON.stringify([...slots, time]));
+};
 
 export default function ContactForm() {
   const [formData, setFormData] = useState({
@@ -156,166 +169,124 @@ export default function ContactForm() {
     e.preventDefault();
     if (dateError) return;
 
-    if (
-      formData.service === "Makeup" &&
-      !isTimeSlotValid(formData.date, formData.time)
-    ) {
-      alert("Selected time has already passed. Please choose another slot.");
+    const bookingKey = generateBookingKey(formData);
+    if (localStorage.getItem(bookingKey)) {
+      alert("You already booked this service for this date and time.");
       return;
     }
 
     setStatus("sending");
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/contact`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
+      const params = {
+        name: formData.name,
+        email: formData.email,
+        service: formData.service,
+        subservice: formData.subservice,
+        subservice2: formData.subservice2 || "N/A",
+        date: formData.date || "Not selected",
+        time: formData.time || "Not selected",
+        message: formData.message || "None",
+      };
 
-      const data = await res.json();
+      await emailjs.send(
+        import.meta.env.VITE_EMAILJS_SERVICE_ID,
+        import.meta.env.VITE_EMAILJS_ADMIN_TEMPLATE,
+        params,
+        import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+      );
 
-      if (data.success) {
-        setStatus("success");
-        setFormData({
-          name: "",
-          email: "",
-          service: "",
-          subservice: "",
-          subservice2: "",
-          date: "",
-          time: "",
-          message: "",
-        });
-      } else {
-        setStatus("error");
+      await emailjs.send(
+        import.meta.env.VITE_EMAILJS_SERVICE_ID,
+        import.meta.env.VITE_EMAILJS_CLIENT_TEMPLATE,
+        params,
+        import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+      );
+
+      localStorage.setItem(bookingKey, "BOOKED");
+      if (formData.date && formData.time) {
+        saveBookedSlot(formData.date, formData.time);
       }
-    } catch {
+
+      setStatus("success");
+      setFormData({
+        name: "",
+        email: "",
+        service: "",
+        subservice: "",
+        subservice2: "",
+        date: "",
+        time: "",
+        message: "",
+      });
+    } catch (err) {
+      console.error("EmailJS error:", err);
       setStatus("error");
     }
   };
 
   return (
     <form className="contact-form" onSubmit={handleSubmit}>
-      <h2 id="contact-form" className="contact-form-title">Purchase/Book a Service</h2>
-      <input
-        name="name"
-        placeholder="Your Name"
-        value={formData.name}
-        onChange={handleChange}
-        required
-      />
+      <h2 id="contact-form" className="contact-form-title">
+        Purchase / Book a Service
+      </h2>
 
-      <input
-        name="email"
-        type="email"
-        placeholder="Your Email"
-        value={formData.email}
-        onChange={handleChange}
-        required
-      />
+      <input name="name" placeholder="Your Name" value={formData.name} onChange={handleChange} required />
+      <input name="email" type="email" placeholder="Your Email" value={formData.email} onChange={handleChange} required />
 
-      <select
-        name="service"
-        className="service-select"
-        value={formData.service}
-        onChange={handleChange}
-        required
-      >
+      <select name="service" value={formData.service} onChange={handleChange} required>
         <option value="">Select a Service</option>
         {Object.keys(serviceOptions).map((service) => (
-          <option key={service} value={service}>
-            {service}
-          </option>
+          <option key={service} value={service}>{service}</option>
         ))}
       </select>
 
       {formData.service && (
-        <select
-          name="subservice"
-          className="service-select"
-          value={formData.subservice}
-          onChange={handleChange}
-          required
-        >
+        <select name="subservice" value={formData.subservice} onChange={handleChange} required>
           <option value="">Select a Sub-Service</option>
           {serviceOptions[formData.service].map((sub) => (
-            <option key={sub} value={sub}>
-              {sub}
-            </option>
+            <option key={sub} value={sub}>{sub}</option>
           ))}
         </select>
       )}
 
       {subServiceSpecs[formData.subservice] && (
-        <select
-        className="service-select"
-          name="subservice2"
-          value={formData.subservice2}
-          onChange={handleChange}
-          required
-        >
+        <select name="subservice2" value={formData.subservice2} onChange={handleChange} required>
           <option value="">Select Specification</option>
           {subServiceSpecs[formData.subservice].map((spec) => (
-            <option key={spec} value={spec}>
-              {spec}
-            </option>
+            <option key={spec} value={spec}>{spec}</option>
           ))}
         </select>
       )}
 
       {formData.service === "Makeup" && (
         <>
-          <input
-            type="date"
-            name="date"
-            min={today}
-            value={formData.date}
-            onChange={handleChange}
-            required
-          />
-
+          <input type="date" name="date" min={today} value={formData.date} onChange={handleChange} required />
           {dateError && <p className="error">{dateError}</p>}
 
-          <select
-            name="time"
-            className="service-select"
-            value={formData.time}
-            onChange={handleChange}
-            required
-          >
+          <select name="time" value={formData.time} onChange={handleChange} required>
             <option value="">Select a Time</option>
             {timeSlots.map((time) => {
-              const disabled = !isTimeSlotValid(formData.date, time);
-
+              const past = !isTimeSlotValid(formData.date, time);
+              const booked = getBookedSlots(formData.date).includes(time);
               return (
-                <option key={time} value={time} disabled={disabled}>
-                  {formatTime(time)} {disabled ? "(Unavailable)" : ""}
+                <option key={time} value={time} disabled={past || booked}>
+                  {formatTime(time)} {booked ? "(Booked)" : past ? "(Unavailable)" : ""}
                 </option>
               );
             })}
           </select>
-
         </>
       )}
 
-      <textarea
-        name="message"
-        placeholder="Additional Details (optional)"
-        value={formData.message}
-        onChange={handleChange}
-      />
+      <textarea name="message" placeholder="Additional Details (optional)" value={formData.message} onChange={handleChange} />
 
       <button type="submit" disabled={!!dateError}>
         {status === "sending" ? "Sending order..." : "Order"}
       </button>
 
       {status === "success" && (
-        <p className="success">
-          ✔ Order Placed
-          <br />
-          You will receive a confirmation mail shortly
-        </p>
+        <p className="success">✔ Order Placed<br />You will receive a confirmation mail shortly</p>
       )}
 
       {status === "error" && (
