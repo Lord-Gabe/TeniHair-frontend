@@ -125,6 +125,7 @@ export default function ContactForm() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    phone: "",
     service: "",
     subservice: "",
     subservice2: "",
@@ -181,6 +182,7 @@ export default function ContactForm() {
       const params = {
         name: formData.name,
         email: formData.email,
+        phone: formData.phone,
         service: formData.service,
         subservice: formData.subservice,
         subservice2: formData.subservice2 || "N/A",
@@ -212,6 +214,7 @@ export default function ContactForm() {
       setFormData({
         name: "",
         email: "",
+        phone: "",
         service: "",
         subservice: "",
         subservice2: "",
@@ -233,6 +236,7 @@ export default function ContactForm() {
 
       <input name="name" placeholder="Your Name" value={formData.name} onChange={handleChange} required />
       <input name="email" type="email" placeholder="Your Email" value={formData.email} onChange={handleChange} required />
+      <input name="phone" type="number" placeholder="Your Whatsapp/Phone number(NGN)" value={formData.phone} onChange={handleChange} maxLength={11} required />
 
       <select name="service" value={formData.service} className={"service-select"} onChange={handleChange} required>
         <option value="">Select a Service</option>
