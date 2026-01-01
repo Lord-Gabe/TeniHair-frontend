@@ -236,7 +236,14 @@ export default function ContactForm() {
 
       <input name="name" placeholder="Your Name" value={formData.name} onChange={handleChange} required />
       <input name="email" type="email" placeholder="Your Email" value={formData.email} onChange={handleChange} required />
-      <input name="phone" type="number" placeholder="Your Whatsapp/Phone number(NGN)" value={formData.phone} onChange={handleChange} maxLength={11} required />
+      <input name="phone" type="number" placeholder="Your Whatsapp/Phone number(NGN)" value={formData.phone} 
+      onChange={(e) => {
+        const value = e.target.value;
+        if (value.length <= 11) {
+          handleChange(e);
+        }
+      }}
+      maxLength={11} required />
 
       <select name="service" value={formData.service} className={"service-select"} onChange={handleChange} required>
         <option value="">Select a Service</option>
