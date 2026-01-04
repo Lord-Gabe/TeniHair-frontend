@@ -7,16 +7,16 @@ export default function Location() {
 
             <p>
               <strong>Address:</strong><br />
-              Suite 06 Safr Plaza, Block B, Rafi Close Kachia Road, Kaduna State, Nigeria
+              Suite 06 Sabr Plaza, Block B, Rafi Close Kachia Road, Kaduna State, Nigeria
             </p>
 
             <p>
-              <strong>Phone:</strong> +23480124002781
+              <strong>Phone:</strong> +2348124002781
             </p>
 
             <p>
               <strong>Email:</strong>{" "}
-              <a href="mailto:tayek62@gmail.com">tayek62@gmail.com</a>
+              <a href="mailto:tenihair069@gmail.com">tenihair069@gmail.com</a>
             </p>
           </div>
 
