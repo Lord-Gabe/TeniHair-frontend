@@ -3,7 +3,7 @@ import CEO from '../assets/CEO.png';
 
 export default function AboutFounder() {
   return (
-    <section id="about" className="about section">
+    <section id="about-founder" className="about section">
           <motion.h2
             initial={{ opacity: 0, y: -50}}  
             whileInView={{ opacity: 1 , y: 0}}
