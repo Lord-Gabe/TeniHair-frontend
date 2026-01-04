@@ -369,8 +369,7 @@ p {
   display: block;
   width: auto;
   max-width: min(600px, 90vw);
-  height: auto;
-  max-height: 600px;
+  height: 600px;
   object-fit: contain;
   background: #fff;
   
@@ -388,8 +387,6 @@ p {
   );
   pointer-events: none;
 }
-
-
 
 /* STATS */
 .community-stats {
@@ -924,16 +921,6 @@ p {
   .review-card {
     min-width: 90%;
     padding: 2rem;
-  }
-
-  /* COMMUNITY */
-  .community-wrapper {
-    flex-direction: column;
-    gap: 2.5rem;
-  }
-
-  .community-text {
-    text-align: center;
   }
 
   /* LOCATION */

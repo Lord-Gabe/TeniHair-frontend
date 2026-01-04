@@ -1,7 +1,7 @@
 import location from "../assets/loc1.png"
 export default function Location() {
   return (
-    <section className="location-section">
+    <section id="location" className="location-section">
           <div className="location-content">
             <h2>Our Location</h2>
 

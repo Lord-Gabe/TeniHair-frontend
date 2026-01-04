@@ -35,6 +35,7 @@ export default function Header() {
         <a href="#products" onClick={closeMenu}>Products</a>
         <a href="#community" onClick={closeMenu}>Community Development</a>
         <a href="#contact-form" onClick={closeMenu}>Purchase / Book Service</a>
+        <a href="#location" onClick={closeMenu}>Location</a>
         <a href="#about-founder" onClick={closeMenu}>Founder</a>
         {/* <a href="#" onClick={handleAdminClick}>Admin</a> */}
       </nav>
