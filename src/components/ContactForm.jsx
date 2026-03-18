@@ -222,7 +222,7 @@ export default function ContactForm() {
   };
 
   return (
-    <form className="contact-form" onSubmit={handleSubmit}>
+    <form className="contact-form" id="contact-form" onSubmit={handleSubmit}>
       <h2 className="contact-form-title">Purchase / Book a Service</h2>
 
       <input name="name" placeholder="Your Name" value={formData.name} onChange={handleChange} required />
