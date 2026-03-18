@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import emailjs from "@emailjs/browser";
 
 /* MAIN SERVICES → SUBSERVICES */
@@ -82,7 +82,6 @@ const subServiceSpecs = {
   ],
 };
 
-/* FIXED TIME SLOTS */
 const timeSlots = ["09:00", "12:00", "15:00"];
 
 /* TIME HELPERS */
@@ -107,20 +106,7 @@ const formatTime = (time) => {
   return `${displayHour}:${minute.toString().padStart(2, "0")} ${period}`;
 };
 
-/* DUPLICATE BOOKING HELPERS */
-const generateBookingKey = ({ email, service, subservice, date, time }) =>
-  `${email}_${service}_${subservice}_${date}_${time}`;
-
-const getBookedSlots = (date) => {
-  const stored = localStorage.getItem(`booked_${date}`);
-  return stored ? JSON.parse(stored) : [];
-};
-
-const saveBookedSlot = (date, time) => {
-  const slots = getBookedSlots(date);
-  localStorage.setItem(`booked_${date}`, JSON.stringify([...slots, time]));
-};
-
+// ================= CONTACT FORM COMPONENT =================
 export default function ContactForm() {
   const [formData, setFormData] = useState({
     name: "",
@@ -136,13 +122,23 @@ export default function ContactForm() {
 
   const [status, setStatus] = useState("");
   const [dateError, setDateError] = useState("");
+  const [bookedSlots, setBookedSlots] = useState([]);
 
   const today = new Date().toISOString().split("T")[0];
+
+  /* FETCH BOOKED SLOTS */
+  useEffect(() => {
+    if (formData.date && formData.service === "Makeup") {
+      fetch(`http://localhost:5000/api/bookings/${formData.date}`)
+        .then(res => res.json())
+        .then(data => setBookedSlots(data))
+        .catch(() => setBookedSlots([]));
+    }
+  }, [formData.date, formData.service]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    /* BLOCK SUNDAYS */
     if (name === "date") {
       const selected = new Date(value);
       if (selected.getDay() === 0) {
@@ -170,47 +166,43 @@ export default function ContactForm() {
     e.preventDefault();
     if (dateError) return;
 
-    const bookingKey = generateBookingKey(formData);
-    if (localStorage.getItem(bookingKey)) {
-      alert("You already booked this service for this date and time.");
-      return;
-    }
-
     setStatus("sending");
 
     try {
-      const params = {
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        service: formData.service,
-        subservice: formData.subservice,
-        subservice2: formData.subservice2 || "N/A",
-        date: formData.date || "Not selected",
-        time: formData.time || "Not selected",
-        message: formData.message || "None",
-      };
+      /* SAVE TO BACKEND */
+      const response = await fetch("http://localhost:5000/api/bookings", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
 
+      const data = await response.json();
+
+      if (!response.ok) {
+        alert(data.message);
+        setStatus("");
+        return;
+      }
+
+      /* SEND EMAIL */
       await emailjs.send(
         import.meta.env.VITE_EMAILJS_SERVICE_ID,
         import.meta.env.VITE_EMAILJS_ADMIN_TEMPLATE,
-        params,
+        formData,
         import.meta.env.VITE_EMAILJS_PUBLIC_KEY
       );
 
       await emailjs.send(
         import.meta.env.VITE_EMAILJS_SERVICE_ID,
         import.meta.env.VITE_EMAILJS_CLIENT_TEMPLATE,
-        params,
+        formData,
         import.meta.env.VITE_EMAILJS_PUBLIC_KEY
       );
 
-      localStorage.setItem(bookingKey, "BOOKED");
-      if (formData.date && formData.time) {
-        saveBookedSlot(formData.date, formData.time);
-      }
-
       setStatus("success");
+
       setFormData({
         name: "",
         email: "",
@@ -222,30 +214,32 @@ export default function ContactForm() {
         time: "",
         message: "",
       });
+
     } catch (err) {
-      console.error("EmailJS error:", err);
+      console.error(err);
       setStatus("error");
     }
   };
 
   return (
     <form className="contact-form" onSubmit={handleSubmit}>
-      <h2 id="contact-form" className="contact-form-title">
-        Purchase / Book a Service
-      </h2>
+      <h2 className="contact-form-title">Purchase / Book a Service</h2>
 
       <input name="name" placeholder="Your Name" value={formData.name} onChange={handleChange} required />
       <input name="email" type="email" placeholder="Your Email" value={formData.email} onChange={handleChange} required />
-      <input name="phone" type="number" placeholder="Your Whatsapp/Phone number(NGN)" value={formData.phone} 
-      onChange={(e) => {
-        const value = e.target.value;
-        if (value.length <= 11) {
-          handleChange(e);
-        }
-      }}
-      maxLength={11} required />
 
-      <select name="service" value={formData.service} className={"service-select"} onChange={handleChange} required>
+      <input
+        name="phone"
+        type="number"
+        placeholder="Your Whatsapp/Phone number"
+        value={formData.phone}
+        onChange={(e) => {
+          if (e.target.value.length <= 11) handleChange(e);
+        }}
+        required
+      />
+
+      <select name="service" value={formData.service} onChange={handleChange} required>
         <option value="">Select a Service</option>
         {Object.keys(serviceOptions).map((service) => (
           <option key={service} value={service}>{service}</option>
@@ -253,8 +247,8 @@ export default function ContactForm() {
       </select>
 
       {formData.service && (
-        <select name="subservice" value={formData.subservice} className={"service-select"} onChange={handleChange} required>
-          <option value="">Select a Sub-Service</option>
+        <select name="subservice" value={formData.subservice} onChange={handleChange} required>
+          <option value="">Select Sub-Service</option>
           {serviceOptions[formData.service].map((sub) => (
             <option key={sub} value={sub}>{sub}</option>
           ))}
@@ -262,7 +256,7 @@ export default function ContactForm() {
       )}
 
       {subServiceSpecs[formData.subservice] && (
-        <select name="subservice2" value={formData.subservice2} className={"service-select"} onChange={handleChange} required>
+        <select name="subservice2" value={formData.subservice2} onChange={handleChange} required>
           <option value="">Select Specification</option>
           {subServiceSpecs[formData.subservice].map((spec) => (
             <option key={spec} value={spec}>{spec}</option>
@@ -275,11 +269,12 @@ export default function ContactForm() {
           <input type="date" name="date" min={today} value={formData.date} onChange={handleChange} required />
           {dateError && <p className="error">{dateError}</p>}
 
-          <select name="time" value={formData.time} className={"service-select"} onChange={handleChange} required>
-            <option value="">Select a Time</option>
+          <select name="time" value={formData.time} onChange={handleChange} required>
+            <option value="">Select Time</option>
             {timeSlots.map((time) => {
               const past = !isTimeSlotValid(formData.date, time);
-              const booked = getBookedSlots(formData.date).includes(time);
+              const booked = bookedSlots.includes(time);
+
               return (
                 <option key={time} value={time} disabled={past || booked}>
                   {formatTime(time)} {booked ? "(Booked)" : past ? "(Unavailable)" : ""}
@@ -290,19 +285,14 @@ export default function ContactForm() {
         </>
       )}
 
-      <textarea name="message" placeholder="Additional Details (optional)" value={formData.message} onChange={handleChange} />
+      <textarea name="message" placeholder="Additional Details" value={formData.message} onChange={handleChange} />
 
       <button type="submit" disabled={!!dateError}>
-        {status === "sending" ? "Sending order..." : "Order"}
+        {status === "sending" ? "Sending..." : "Order"}
       </button>
 
-      {status === "success" && (
-        <p className="success">✔ Order Placed<br />You will receive a confirmation mail shortly</p>
-      )}
-
-      {status === "error" && (
-        <p className="error">✖ Something went wrong</p>
-      )}
+      {status === "success" && <p className="success">✔ Booking successful</p>}
+      {status === "error" && <p className="error">✖ Something went wrong</p>}
     </form>
   );
 }
