@@ -37,9 +37,33 @@ export default function Hero() {
             transition={{ duration: 2 }}
         >
             <div className="hero-content">
-                <h1>BEAUTY <br /> IMPACT <br /> UPLIFTMENT</h1>
-                <p>Luxury products, expert services, and a community built on creativity and confidence.</p>
-                <button className="cta-btn" onClick={() => window.location.href = "#products"}>Explore Products</button>
+              <motion.h1
+                initial={{ opacity: 0, y: 40 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 1, delay: 0.3 }}
+              >
+                BEAUTY <br /> IMPACT <br /> UPLIFTMENT
+              </motion.h1>
+
+              <motion.p
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 1, delay: 0.6 }}
+              >
+                Luxury products, expert services, and a community built on creativity and confidence.
+              </motion.p>
+
+              <motion.button
+                className="cta-btn"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 1, delay: 0.9 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => window.location.href = "#products"}
+              >
+                Explore Products
+              </motion.button>
             </div>
 
             <AnimatePresence initial={false} mode="wait">

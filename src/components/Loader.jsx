@@ -13,8 +13,8 @@ export default function Loader() {
           ease: "linear"
         }}
       />
-      <img src={logo} alt="Teni Beauty Studio Logo" className="loader-logo" />
-      <p className="loader-text">Teni Beauty Studio</p>
+      {/* <img src={logo} alt="Teni Beauty Studio Logo" className="loader-logo" /> */}
+      {/* <p className="loader-text">Teni Beauty Studio</p> */}
     </div>
   );
 }

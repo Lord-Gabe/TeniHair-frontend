@@ -10,7 +10,8 @@ import AboutFounder from "./components/AboutFounder";
 import Community from "./components/Community";
 import Location from "./components/Location";
 import Products from "./components/Products";
-import ContactForm from "./components/ContactForm";
+import Policies from "./components/Policies";
+// import ContactForm from "./components/ContactForm";
 import Hero from "./components/Hero";
 
 export default function App() {
@@ -32,8 +33,9 @@ export default function App() {
           <Products />
           <Reviews />
           <Community />
-          <ContactForm />
+          {/* <ContactForm /> */} 
           <Location />
+          <Policies />
           <AboutFounder />
           <Footer />
         </div>

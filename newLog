@@ -1,0 +1,23 @@
+++++++++++++++++++++++++++++++++++++++++++++++++++++++ New to do +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Change the deisgn and structure of the current website and make it to be just a simple landing page with a whatsapp link to book appointments and purchase products. Remove the booking system and the admin dashboard. 
+
+Sectionalize the navbar and let it have some drop downs for more options. (But is it mobile compatible)?
+    Maybe a side panel of all the things listed there instead for mobile use.
+
+The products should have name and description before see more 
+    Which are :
+
+    Products should be 3 pictures 
+    -Bridal hair / hair installation view more (a collated video will be sent )
+
+A section called Price list of all services. (Set this as cards).
+
+Policies should be like a board/cardboard layout displaying everything.
+
+Make them able to alternate between light n dark mode. Change fonts and also colors but maintain the brand magenta color
+
+
+still not satisified with the new rework especially with the mobile responsive.
+also fix the active section highlight in the header
+
+-==============================all the changes has been effected in the frontend folder.

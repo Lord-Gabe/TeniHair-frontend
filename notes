@@ -1,0 +1,12 @@
+DATES ARE RECORDED IN MONTHS, DAYS AND YEAR
+
+3/18/26
+After a long while of working on this project(First days of January), i:
+Fixed the bookings(stopped it from double booking)
+Fixed navigation of "Book service".
+
+What to do next:
+Improve UI in general(Done)
+Create an admin tab to view reservations
+
+bookings have currently been removed. Going to be better implemented in future updates or works
